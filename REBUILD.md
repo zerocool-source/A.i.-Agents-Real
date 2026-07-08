@@ -55,6 +55,20 @@ demo they show prospects.
    Up Boss, HubSpot, Salesforce, Zoho, Odoo, NetSuite, Meta Ads, Mailgun,
    Twilio) with flip-switch connect controls. API keys are stored
    server-side only and echoed back masked (last 4 characters).
+7. **Growth ops band (the Polsia panel set):**
+   - **Setup Payments strip:** "Payments not configured / Enable Stripe"
+     prompt that flips to a ready state (stub until a real key connects).
+   - **Social panel:** brand handle, AI-drafted posts (Draft / Post /
+     discard), an Auto toggle, and a published counter. Posting updates
+     local state until a real account is connected.
+   - **Email panel:** desk address, sent/received counters, latest send
+     preview, and a send-welcome-email action with recipient input.
+   - **Website & Domain panel:** the live product URL with status dot and
+     an open-site action (custom domain slot reserved).
+   - **Ads & Team panel:** "Run ads" drafts a campaign spec with the AI and
+     files it into Documents; team roster with an add-member modal.
+   All draft actions use the agent brain; post/send actions are honest
+   stubs that log to the wire feed until real accounts are connected.
 
 ### AI agent brain
 
