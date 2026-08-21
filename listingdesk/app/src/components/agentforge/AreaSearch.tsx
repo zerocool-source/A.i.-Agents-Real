@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 
 import {
   createListing,
+  importListing,
   postMarketUpdate,
   saveHomeForClient,
   searchArea,
@@ -139,6 +140,18 @@ export function AreaSearch(props: AreaSearchData) {
   async function addToBoard(h: MarketHome) {
     setAddingId(h.id);
     try {
+      // With a listing link the desk pulls the real property — the agent's
+      // remarks and the listing's own photos come with it.
+      if (h.url) {
+        const res = await importListing({ data: { url: h.url } });
+        setFlash(
+          res.real
+            ? `${h.address} pulled onto your board with its listing photos.`
+            : `${h.address} added — that site would not hand over the details.`,
+        );
+        router.invalidate();
+        return;
+      }
       await createListing({
         data: {
           address: h.address,

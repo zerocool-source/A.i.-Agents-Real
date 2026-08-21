@@ -275,6 +275,7 @@ export async function searchMarket(q: SearchQuery): Promise<SearchResult> {
   const iLat = col("LATITUDE");
   const iLng = col("LONGITUDE");
   const iUrl = col("URL");
+  const iMls = col("MLS");
   const iOpen = col("NEXT OPEN HOUSE START");
 
   const homes: MarketHome[] = [];
@@ -310,6 +311,7 @@ export async function searchMarket(q: SearchQuery): Promise<SearchResult> {
           : `https://www.redfin.com${rawUrl}`
         : undefined,
       openHouse: (r[iOpen] ?? "").trim() || undefined,
+      mls: (r[iMls] ?? "").trim() || undefined,
     });
   }
 
@@ -355,4 +357,320 @@ export async function searchMarket(q: SearchQuery): Promise<SearchResult> {
   cache.set(key, { at: Date.now(), data });
   if (cache.size > 40) cache.delete(cache.keys().next().value as string);
   return data;
+}
+
+/* ------------------------------------------------------------------ */
+/* Real listing lookup: paste a link, get the actual property          */
+
+export interface ListingLookup {
+  address: string;
+  city: string;
+  state?: string;
+  zip?: string;
+  price?: number;
+  beds?: number;
+  baths?: number;
+  sqft?: number;
+  yearBuilt?: number;
+  lat?: number;
+  lng?: number;
+  photoUrl?: string;
+  sourceUrl: string;
+  mls?: string;
+  features?: string;
+  status?: string;
+  photoUrls?: string[];
+}
+
+const metaTag = (html: string, prop: string): string | undefined => {
+  const re = new RegExp(
+    `<meta[^>]+(?:property|name)=["']${prop}["'][^>]*content=["']([^"']*)["']`,
+    "i",
+  );
+  const alt = new RegExp(
+    `<meta[^>]+content=["']([^"']*)["'][^>]*(?:property|name)=["']${prop}["']`,
+    "i",
+  );
+  return html.match(re)?.[1] ?? html.match(alt)?.[1] ?? undefined;
+};
+
+const ENTITIES: Record<string, string> = {
+  amp: "&",
+  quot: '"',
+  apos: "'",
+  lt: "<",
+  gt: ">",
+  nbsp: " ",
+  rsquo: "\u2019",
+  lsquo: "\u2018",
+  rdquo: "\u201d",
+  ldquo: "\u201c",
+  mdash: "\u2014",
+  ndash: "\u2013",
+  hellip: "\u2026",
+  deg: "\u00b0",
+};
+
+// Listing feeds double-encode ("&amp;rsquo;"), so decode until it settles.
+const decodeEntities = (input: string): string => {
+  let out = input;
+  for (let pass = 0; pass < 3; pass++) {
+    const next = out
+      .replace(/&#(\d+);/g, (_, n) => String.fromCodePoint(Number(n)))
+      .replace(/&#x([0-9a-f]+);/gi, (_, n) => String.fromCodePoint(parseInt(n, 16)))
+      .replace(/&([a-z]+);/gi, (m, name) => ENTITIES[name.toLowerCase()] ?? m);
+    if (next === out) break;
+    out = next;
+  }
+  return out;
+};
+
+async function fetchHtml(url: string): Promise<string | null> {
+  try {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 14000);
+    const res = await fetch(url, {
+      headers: {
+        "User-Agent": UA,
+        Accept: "text/html,application/xhtml+xml",
+        "Accept-Language": "en-US,en;q=0.9",
+      },
+      signal: ctrl.signal,
+    });
+    clearTimeout(timer);
+    if (!res.ok) return null;
+    return await res.text();
+  } catch {
+    return null;
+  }
+}
+
+export function photoUrlsForMls(mls: string, count = 6): string[] {
+  const clean = mls.trim().replace(/[^A-Za-z0-9]/g, "");
+  if (clean.length < 4) return [];
+  const shard = clean.slice(-3);
+  const urls: string[] = [
+    `https://ssl.cdn-redfin.com/photo/45/bigphoto/${shard}/${clean}_0.jpg`,
+  ];
+  for (let n = 1; n < count; n++) {
+    urls.push(
+      `https://ssl.cdn-redfin.com/photo/45/bigphoto/${shard}/${clean}_${n}_0.jpg`,
+    );
+  }
+  return urls;
+}
+
+// Any listing URL carries the address; these read it out.
+export function addressFromListingUrl(
+  url: string,
+): { address: string; city: string } | null {
+  try {
+    const u = new URL(url);
+    const host = u.hostname.toLowerCase();
+    const path = u.pathname;
+    if (host.includes("zillow.")) {
+      const m =
+        path.match(/\/homedetails\/([^/]+)\//i) ??
+        path.match(/\/homes\/([^/]+?)_rb/i);
+      if (!m) return null;
+      const parts = m[1].split("-");
+      const stateIdx = parts.findIndex((p) => /^[A-Z]{2}$/.test(p));
+      if (stateIdx < 2) return null;
+      const cityStart = Math.max(1, stateIdx - 2);
+      return {
+        address: parts.slice(0, cityStart).join(" "),
+        city: parts.slice(cityStart, stateIdx).join(" "),
+      };
+    }
+    // Redfin: /CA/Temecula/29907-Longvale-Ct-92592/home/6197060
+    const m = path.match(/^\/[A-Z]{2}\/([^/]+)\/([^/]+?)-(\d{5})\/home\//i);
+    if (m) {
+      return {
+        address: m[2].replace(/-/g, " "),
+        city: m[1].replace(/-/g, " "),
+      };
+    }
+    // Fall back to any "<street>-<City>-<ST>-<zip>" shaped segment.
+    const seg = path.split("/").filter(Boolean).pop() ?? "";
+    const parts = seg.split("-");
+    const stateIdx = parts.findIndex((x) => /^[A-Z]{2}$/.test(x));
+    if (stateIdx >= 2) {
+      const cityStart = Math.max(1, stateIdx - 2);
+      return {
+        address: parts.slice(0, cityStart).join(" "),
+        city: parts.slice(cityStart, stateIdx).join(" "),
+      };
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+// Listing pages describe themselves in their share tags, e.g.
+// "(CRMLS) For Sale: 3 beds, 2 baths ∙ 2173 sq. ft. ∙ 29907 Longvale Ct,
+//  Temecula, CA 92592 ∙ $735,000 ∙ MLS# SW26161992 ∙ SINGLE-STORY | ..."
+function fromShareTags(html: string, url: string): ListingLookup | null {
+  const title = decodeEntities(metaTag(html, "og:title") ?? "");
+  const desc = decodeEntities(metaTag(html, "og:description") ?? "");
+  const image = metaTag(html, "og:image") ?? metaTag(html, "twitter:image");
+  const both = `${desc} ∙ ${title}`;
+
+  const addrMatch =
+    both.match(/∙\s*([^∙]+?),\s*([A-Za-z .'-]+),\s*([A-Z]{2})\s*(\d{5})/) ??
+    both.match(/at\s+([^,]+),\s*([A-Za-z .'-]+),\s*([A-Z]{2})\s*(\d{5})/) ??
+    title.match(/^([^,]+),\s*([A-Za-z .'-]+),\s*([A-Z]{2})\s*(\d{5})/);
+  if (!addrMatch) return null;
+
+  const priceStr = both.match(/\$([\d,]{4,})/)?.[1];
+  const beds = both.match(/([\d.]+)\s*beds?/i)?.[1];
+  const baths = both.match(/([\d.]+)\s*baths?/i)?.[1];
+  const sqft = both.match(/([\d,]+)\s*sq\.?\s*ft/i)?.[1];
+  const mls = both.match(/MLS#?\s*([A-Za-z0-9-]+)/i)?.[1];
+  const soldFor = both.match(/sold for \$([\d,]+)/i)?.[1];
+
+  // Whatever the listing agent wrote, after the MLS number.
+  const blurb = desc.split(/MLS#?\s*[A-Za-z0-9-]+\s*∙\s*/i)[1];
+
+  return {
+    address: addrMatch[1].trim(),
+    city: addrMatch[2].trim(),
+    state: addrMatch[3],
+    zip: addrMatch[4],
+    price: Number((soldFor ?? priceStr ?? "").replace(/,/g, "")) || undefined,
+    beds: beds ? Number(beds) : undefined,
+    baths: baths ? Number(baths) : undefined,
+    sqft: sqft ? Number(sqft.replace(/,/g, "")) : undefined,
+    photoUrl: image && image.startsWith("http") ? image : undefined,
+    sourceUrl: url,
+    mls,
+    features: blurb ? blurb.replace(/\.\.\.$/, "").trim().slice(0, 320) : undefined,
+    status: /sold/i.test(both)
+      ? "Sold"
+      : /pending|contingent/i.test(both)
+        ? "Pending"
+        : /coming soon/i.test(both)
+          ? "Pre On-Market"
+          : "Active",
+  };
+}
+
+// Zillow blocks server reads, but its URLs carry the address, and the MLS
+// feed can find the same home — which also hands back a page we CAN read.
+function addressFromZillowUrl(url: string): { address: string; city: string } | null {
+  const m = url.match(/\/homedetails\/([^/]+)\//i) ?? url.match(/\/homes\/([^/]+?)_rb/i);
+  if (!m) return null;
+  const parts = m[1].split("-");
+  const stateIdx = parts.findIndex((p) => /^[A-Z]{2}$/.test(p));
+  if (stateIdx < 2) return null;
+  // ...-<street words>-<City words>-<ST>-<zip>
+  const cityStart = Math.max(1, stateIdx - 2);
+  const street = parts.slice(0, cityStart).join(" ");
+  const city = parts.slice(cityStart, stateIdx).join(" ");
+  if (!street || !city) return null;
+  return { address: street, city };
+}
+
+const normAddr = (s: string) =>
+  s.toLowerCase().replace(/[^a-z0-9 ]/g, "").replace(/\s+/g, " ").trim();
+
+async function findInFeed(
+  address: string,
+  city: string,
+): Promise<MarketHome | null> {
+  const key = Object.keys(SEARCH_AREAS).find(
+    (k) => SEARCH_AREAS[k].label.toLowerCase() === city.toLowerCase(),
+  );
+  for (const area of [key ?? "all", "all"]) {
+    const res = await searchMarket({ area });
+    const want = normAddr(address);
+    const hit = res.homes.find((h) => {
+      const have = normAddr(h.address);
+      return have === want || have.startsWith(want) || want.startsWith(have);
+    });
+    if (hit) return hit;
+    if (area === "all") break;
+  }
+  return null;
+}
+
+// Give it any listing link she has — Redfin, Zillow, an IDX page — and the
+// desk comes back with the real home. The MLS feed leads because it answers
+// reliably from the edge; the listing page is a bonus for the agent remarks.
+export async function lookupListingByUrl(
+  rawUrl: string,
+): Promise<ListingLookup | null> {
+  let url = rawUrl.trim();
+  if (!/^https?:\/\//i.test(url)) url = `https://${url}`;
+
+  const parsed = addressFromListingUrl(url);
+  let feedHit: MarketHome | null = null;
+  if (parsed) feedHit = await findInFeed(parsed.address, parsed.city);
+
+  // The page is worth a try for the listing agent's own write-up.
+  const html = await fetchHtml(url);
+  const fromPage = html ? fromShareTags(html, url) : null;
+
+  if (!feedHit && !fromPage) return null;
+
+  const address = fromPage?.address ?? feedHit?.address ?? parsed?.address ?? "";
+  const city = fromPage?.city ?? feedHit?.city ?? parsed?.city ?? "";
+  if (!address) return null;
+
+  const mls = fromPage?.mls ?? feedHit?.mls;
+  const photos = mls ? photoUrlsForMls(mls) : [];
+
+  const featureBits = [
+    feedHit?.propertyType,
+    feedHit?.yearBuilt ? `built ${feedHit.yearBuilt}` : "",
+    feedHit?.lotSqft
+      ? `${feedHit.lotSqft.toLocaleString("en-US")} sqft lot`
+      : "",
+    feedHit?.hoa ? `HOA $${feedHit.hoa}/mo` : "",
+  ]
+    .filter(Boolean)
+    .join(" · ");
+
+  return {
+    address,
+    city,
+    state: fromPage?.state,
+    zip: fromPage?.zip,
+    price: fromPage?.price ?? feedHit?.price,
+    beds: fromPage?.beds ?? feedHit?.beds,
+    baths: fromPage?.baths ?? feedHit?.baths,
+    sqft: fromPage?.sqft ?? feedHit?.sqft,
+    yearBuilt: feedHit?.yearBuilt,
+    lat: feedHit?.lat,
+    lng: feedHit?.lng,
+    photoUrl: fromPage?.photoUrl ?? photos[0],
+    photoUrls: photos,
+    sourceUrl: feedHit?.url ?? url,
+    mls,
+    features: fromPage?.features || featureBits || undefined,
+    status: fromPage?.status ?? feedHit?.status,
+  };
+}
+
+// Pull the listing's own photo so it lands in her storage, not hotlinked.
+export async function fetchPhotoBytes(
+  url: string,
+): Promise<{ bytes: Uint8Array; contentType: string } | null> {
+  try {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 14000);
+    const res = await fetch(url, {
+      headers: { "User-Agent": UA, Accept: "image/*" },
+      signal: ctrl.signal,
+    });
+    clearTimeout(timer);
+    if (!res.ok) return null;
+    const contentType = res.headers.get("content-type") ?? "image/jpeg";
+    if (!/^image\/(jpeg|png|webp)/.test(contentType)) return null;
+    const buf = await res.arrayBuffer();
+    if (buf.byteLength > 8_000_000 || buf.byteLength < 512) return null;
+    return { bytes: new Uint8Array(buf), contentType };
+  } catch {
+    return null;
+  }
 }

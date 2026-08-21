@@ -9,6 +9,7 @@ import {
   deleteListingPhoto,
   deleteTask,
   generateWalkthrough,
+  pullListingPhoto,
   importListing,
   rateActivity,
   runTask,
@@ -1126,6 +1127,34 @@ function ListingBoard({
             <p className="features">{l.features}</p>
             {l.notes && <p className="notes">{l.notes}</p>}
             <PhotoStrip listing={l} busyId={busyId} onBusy={setBusyId} onChanged={onChanged} />
+            {l.sourceUrl && (
+              <div className="af-sourcerow">
+                <a
+                  className="af-opbtn"
+                  href={l.sourceUrl}
+                  target="_blank"
+                  rel="noreferrer noopener"
+                >
+                  View the live listing ↗
+                </a>
+                <button
+                  className="af-opbtn"
+                  type="button"
+                  disabled={busyId !== null}
+                  onClick={async () => {
+                    setBusyId(l.id);
+                    try {
+                      await pullListingPhoto({ data: { id: l.id } });
+                    } finally {
+                      setBusyId(null);
+                      onChanged();
+                    }
+                  }}
+                >
+                  {busyId === l.id ? "Pulling…" : "Pull the listing photo"}
+                </button>
+              </div>
+            )}
             <div className="af-stage" aria-label={`Stage: ${STAGE_LABELS[l.status]}`}>
               {LISTING_STAGES.map((s, i) => (
                 <span

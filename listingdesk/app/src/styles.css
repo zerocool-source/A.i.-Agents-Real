@@ -4174,3 +4174,10 @@ textarea:focus-visible {
     grid-template-columns: 1fr auto;
   }
 }
+
+.af-sourcerow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}

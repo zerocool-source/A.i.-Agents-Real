@@ -70,7 +70,7 @@ export function buildSeed(): DB {
     campaigns: [
       {
         id: "cmp-sagecrest",
-        listingId: "ls-sagecrest",
+        listingId: "ls-33721verbena",
         ownerTake:
           "This backyard is the one buyers keep asking me for: pool, spa, and a cul-de-sac where kids actually ride bikes. The kitchen remodel means nothing left to do but move in.",
         channels: ["instagram", "facebook"],
@@ -100,7 +100,7 @@ export function buildSeed(): DB {
         name: "Priya and Dan Ramos",
         source: "Open house sign-in",
         phone: "951-555-0184",
-        listingId: "ls-sagecrest",
+        listingId: "ls-33721verbena",
         stage: "contacted",
         notes: "Pre-approved to $700k. Loved the backyard; asked about schools.",
         createdAt: daysAgo(2),
@@ -110,7 +110,7 @@ export function buildSeed(): DB {
         name: "Marcus Cho",
         source: "Zillow inquiry",
         email: "m.cho@example.com",
-        listingId: "ls-lakeshore",
+        listingId: "ls-32348yosemitel",
         stage: "new",
         notes: "Asked if backup offers are being taken.",
         createdAt: hoursAgo(7),
@@ -127,99 +127,170 @@ export function buildSeed(): DB {
     ],
     listings: [
       {
-        id: "ls-sagecrest",
-        address: "31245 Sagecrest Way",
-        city: "Temecula",
-        price: 689000,
-        beds: 4,
-        baths: 3,
-        sqft: 2650,
+        id: "ls-25018cinnabarc",
+        address: "25018 Cinnabar Ct",
+        city: "Wildomar",
+        price: 950000,
+        beds: 6,
+        baths: 4.5,
+        sqft: 3761,
+        lat: 33.6000203,
+        lng: -117.2232363,
         features:
-          "Pool and spa, cul-de-sac, remodeled kitchen with quartz island, three-car garage",
-        status: "active",
-        leadCount: 11,
-        walkthroughDocumentId: "doc-walk-sagecrest",
-        photoUrl: "/assets/cover-sagecrest.webp",
-        lat: 33.5122,
-        lng: -117.118,
-        notes: "Sellers want offers reviewed after Sunday's open house.",
+          "Coming Soon: Welcome home to this stunning Estrella Hills luxury residence. From th",
+        status: "coming-soon",
+        leadCount: 3,
+        photoUrl: "/assets/home-25018-cinnabar-ct-wildomar-0.jpg",
+        photos: [
+          "/assets/home-25018-cinnabar-ct-wildomar-0.jpg",
+          "/assets/home-25018-cinnabar-ct-wildomar-1.jpg",
+          "/assets/home-25018-cinnabar-ct-wildomar-2.jpg",
+          "/assets/home-25018-cinnabar-ct-wildomar-3.jpg",
+          "/assets/home-25018-cinnabar-ct-wildomar-4.jpg",
+          "/assets/home-25018-cinnabar-ct-wildomar-5.jpg",
+          "/assets/home-25018-cinnabar-ct-wildomar-6.jpg",
+          "/assets/home-25018-cinnabar-ct-wildomar-7.jpg",
+        ],
+        sourceUrl: "https://www.redfin.com/CA/Wildomar/25018-Cinnabar-Ct-92595/home/8167786",
+        notes:
+          "Live MLS listing · MLS# DW26174378 — real photos pulled from the listing. Her own shoot and walkthrough go on top.",
         createdAt: daysAgo(6),
       },
       {
-        id: "ls-juniper",
-        address: "27810 Juniper Bend",
+        id: "ls-33721verbena",
+        walkthroughDocumentId: "doc-walk-verbena",
+        address: "33721 Verbena",
         city: "Murrieta",
-        price: 575000,
-        beds: 3,
-        baths: 2,
-        sqft: 1890,
+        price: 739900,
+        beds: 5,
+        baths: 4.5,
+        sqft: 4063,
+        lat: 33.6298516,
+        lng: -117.1529036,
         features:
-          "Paid-off solar, RV parking, new HVAC, walking distance to Monte Vista Elementary",
-        status: "coming-soon",
-        leadCount: 3,
-        walkthroughDocumentId: "doc-walk-juniper",
-        photoUrl: "/assets/cover-juniper.webp",
-        lat: 33.576,
-        lng: -117.196,
-        notes: "Photos land Thursday. Walkthrough video should drop the same day.",
-        createdAt: daysAgo(1),
+          "Welcome to this spacious 4,063-sq-ft entertainer’s home on one of the larger lots",
+        status: "active",
+        leadCount: 7,
+        photoUrl: "/assets/home-33721-verbena-murrieta-0.jpg",
+        photos: [
+          "/assets/home-33721-verbena-murrieta-0.jpg",
+          "/assets/home-33721-verbena-murrieta-1.jpg",
+          "/assets/home-33721-verbena-murrieta-2.jpg",
+          "/assets/home-33721-verbena-murrieta-3.jpg",
+          "/assets/home-33721-verbena-murrieta-4.jpg",
+          "/assets/home-33721-verbena-murrieta-5.jpg",
+          "/assets/home-33721-verbena-murrieta-6.jpg",
+        ],
+        sourceUrl: "https://www.redfin.com/CA/Murrieta/33721-Verbena-Ave-92563/home/8161403",
+        notes:
+          "Live MLS listing · MLS# SW26174777 — real photos pulled from the listing. Her own shoot and walkthrough go on top.",
+        createdAt: daysAgo(2),
       },
       {
-        id: "ls-lakeshore",
-        address: "1534 Lakeshore Dr",
-        city: "Lake Elsinore",
-        price: 449900,
-        beds: 3,
-        baths: 2,
-        sqft: 1540,
-        features: "Lake view from the primary suite, covered patio, no HOA",
+        id: "ls-33455gypsumst",
+        address: "33455 Gypsum St",
+        city: "Menifee",
+        price: 825000,
+        beds: 7,
+        baths: 4.0,
+        sqft: 4041,
+        lat: 33.6342954,
+        lng: -117.150463,
+        features:
+          "*  *  * PAID OFF SOLAR + HIGHLY UPGRADED + LOW HOA *  *  *  Welcome to 33455 Gypsum Stre",
+        status: "active",
+        leadCount: 4,
+        photoUrl: "/assets/home-33455-gypsum-st-menifee-0.jpg",
+        photos: [
+          "/assets/home-33455-gypsum-st-menifee-0.jpg",
+          "/assets/home-33455-gypsum-st-menifee-1.jpg",
+          "/assets/home-33455-gypsum-st-menifee-2.jpg",
+          "/assets/home-33455-gypsum-st-menifee-3.jpg",
+          "/assets/home-33455-gypsum-st-menifee-4.jpg",
+          "/assets/home-33455-gypsum-st-menifee-5.jpg",
+          "/assets/home-33455-gypsum-st-menifee-6.jpg",
+          "/assets/home-33455-gypsum-st-menifee-7.jpg",
+        ],
+        sourceUrl: "https://www.redfin.com/CA/Menifee/33455-Gypsum-St-92584/home/6671409",
+        notes:
+          "Live MLS listing · MLS# IG26180522 — real photos pulled from the listing. Her own shoot and walkthrough go on top.",
+        createdAt: daysAgo(9),
+      },
+      {
+        id: "ls-32348yosemitel",
+        address: "32348 Yosemite Ln",
+        city: "Temecula",
+        price: 619900,
+        beds: 5,
+        baths: 2.5,
+        sqft: 3806,
+        lat: 33.4566746,
+        lng: -117.0951109,
+        features:
+          "Beautiful South Temecula home located in the highly desirable Redwood Collection of",
         status: "pending",
-        leadCount: 23,
-        walkthroughDocumentId: "doc-walk-lakeshore",
-        photoUrl: "/assets/cover-lakeshore.webp",
-        lat: 33.665,
-        lng: -117.348,
-        notes: "In escrow, appraisal scheduled. Backup offers on file.",
-        createdAt: daysAgo(19),
+        leadCount: 11,
+        photoUrl: "/assets/home-32348-yosemite-ln-temecula-0.jpg",
+        photos: [
+          "/assets/home-32348-yosemite-ln-temecula-0.jpg",
+          "/assets/home-32348-yosemite-ln-temecula-1.jpg",
+          "/assets/home-32348-yosemite-ln-temecula-2.jpg",
+          "/assets/home-32348-yosemite-ln-temecula-3.jpg",
+          "/assets/home-32348-yosemite-ln-temecula-4.jpg",
+          "/assets/home-32348-yosemite-ln-temecula-5.jpg",
+          "/assets/home-32348-yosemite-ln-temecula-6.jpg",
+          "/assets/home-32348-yosemite-ln-temecula-7.jpg",
+        ],
+        sourceUrl: "https://www.redfin.com/CA/Temecula/32348-Yosemite-Ln-92592/home/12275324",
+        notes:
+          "Live MLS listing · MLS# SW20089153 — real photos pulled from the listing. Her own shoot and walkthrough go on top.",
+        createdAt: daysAgo(21),
       },
       {
-        id: "ls-vistadelsol",
-        address: "890 Vista Del Sol",
-        city: "Hemet",
-        price: 389000,
-        beds: 2,
-        baths: 2,
-        sqft: 1310,
-        features: "55+ community, single story, low-maintenance yard",
+        id: "ls-45027soniadr",
+        address: "45027 Sonia Dr",
+        city: "Lake Elsinore",
+        price: 685000,
+        beds: 5,
+        baths: 3.0,
+        sqft: 3081,
+        lat: 33.7048721,
+        lng: -117.3192239,
+        features:
+          "5 bed, 3.0 bath, 3081 sqft",
         status: "sold",
-        lat: 33.73,
-        lng: -116.993,
-        leadCount: 17,
-        notes: "Closed $6k over list. Ask sellers for the review and referral.",
-        createdAt: daysAgo(41),
+        leadCount: 0,
+        photoUrl: "/assets/home-45027-sonia-dr-lake-elsinore-0.jpg",
+        photos: [
+          "/assets/home-45027-sonia-dr-lake-elsinore-0.jpg",
+        ],
+        sourceUrl: "https://www.redfin.com/CA/Lake-Elsinore/45027-Sonia-Dr-92532/home/8161228",
+        notes:
+          "Live MLS listing · MLS# CV26085207 — real photos pulled from the listing. Her own shoot and walkthrough go on top.",
+        createdAt: daysAgo(34),
       },
     ],
     tasks: [
       {
         id: "t-juniper-posts",
-        title: "Just-listed post set for 27810 Juniper Bend",
+        title: "Just-listed post set for 25018 Cinnabar Ct",
         description:
           "Instagram, Facebook, and Nextdoor versions. Lead with paid-off solar and RV parking; coming-soon framing until Thursday photos.",
         kind: "content",
         status: "queued",
         tags: ["CONTENT", "THURSDAY"],
-        listingId: "ls-juniper",
+        listingId: "ls-25018cinnabarc",
         createdAt: hoursAgo(8),
       },
       {
         id: "t-openhouse-followup",
         title: "Follow up with Sunday open house sign-ins",
         description:
-          "Nine sign-ins at Sagecrest Way. Draft a text and email for each bucket: pre-approved buyers, neighbors, and just-looking. Mention offers review Monday.",
+          "Nine sign-ins at Verbena Way. Draft a text and email for each bucket: pre-approved buyers, neighbors, and just-looking. Mention offers review Monday.",
         kind: "followup",
         status: "queued",
         tags: ["FOLLOWUP"],
-        listingId: "ls-sagecrest",
+        listingId: "ls-33721verbena",
         createdAt: hoursAgo(16),
       },
       {
@@ -235,111 +306,47 @@ export function buildSeed(): DB {
     ],
     documents: [
       {
-        id: "doc-walk-juniper",
-        title: "Walkthrough: 27810 Juniper Bend",
+        id: "doc-walk-verbena",
+        title: "Walkthrough: 33721 Verbena",
         kind: "walkthrough",
-        listingId: "ls-juniper",
+        listingId: "ls-33721verbena",
         approval: "approved",
-        videoUrl: "/assets/juniper-walkthrough.mp4",
-        createdAt: hoursAgo(20),
-        content: `# Walkthrough: 27810 Juniper Bend
-
-**Format.** Vertical video, 31 seconds, one clean pass.
-
-## Hook (0:00 to 0:03)
-On-screen: JUST LISTED. Murrieta. $575,000. Spoken: "This Murrieta farmhouse pays its own power bill, and the RV finally has a home."
-
-## Shot list
-1. (5s) Exterior push-in. "Single-story modern farmhouse with paid-off solar."
-2. (5s) Living room glide. "Bright, open, and made to gather."
-3. (5s) Kitchen orbit. "Butcher-block island, white shaker cabinets."
-4. (5s) Primary bedroom push. "Quiet primary at the back of the house."
-5. (5s) Backyard glide. "Pergola, room to play, and RV parking on the side."
-
-## Caption bar
-Five words max per shot; keep the price pinned.
-
-## Post copy
-Coming to market in Murrieta. 3 bed, 2 bath, 1,890 sqft with PAID-OFF solar, RV parking, and a new HVAC. $575,000. Comment TOUR for the private link.
-#MurrietaRealEstate #ComingSoon #TemeculaValley #PaidOffSolar
-
-## CTA
-"Comment TOUR and I will send you the private showing link before it hits the weekend."`,
-      },
-      {
-        id: "doc-walk-lakeshore",
-        title: "Walkthrough: 1534 Lakeshore Dr",
-        kind: "walkthrough",
-        listingId: "ls-lakeshore",
-        approval: "approved",
-        videoUrl: "/assets/lakeshore-walkthrough.mp4",
-        createdAt: daysAgo(3),
-        content: `# Walkthrough: 1534 Lakeshore Dr
-
-**Format.** Vertical video, 31 seconds, one calm pass toward the water.
-
-## Hook (0:00 to 0:03)
-On-screen: JUST LISTED. Lake Elsinore. $449,900. Spoken: "Wake up to the lake, and no HOA telling you what to do with it."
-
-## Shot list
-1. (5s) Exterior push-in. "Coastal lake house with a covered front porch."
-2. (5s) Living room glide. "Light, easy, and open to the view."
-3. (5s) Kitchen orbit. "Coastal kitchen with a pale blue island."
-4. (5s) Primary bedroom push. "Wake up to the water."
-5. (5s) Covered patio glide. "Your seven o'clock, over the lake."
-
-## Caption bar
-Five words max per shot; keep the price pinned.
-
-## Post copy
-Just listed on the lake in Lake Elsinore. 3 bed, 2 bath, 1,540 sqft, lake-view primary, covered patio, and NO HOA. $449,900. Comment TOUR for the private link.
-#LakeElsinore #JustListed #LakeView #NoHOA
-
-## CTA
-"Comment TOUR and I will send you the private showing link before the weekend."`,
-      },
-      {
-        id: "doc-walk-sagecrest",
-        title: "Walkthrough: 31245 Sagecrest Way",
-        kind: "walkthrough",
-        listingId: "ls-sagecrest",
-        approval: "approved",
-        videoUrl: "/assets/sagecrest-walkthrough.mp4",
+        videoUrl: "/assets/verbena-walkthrough.mp4",
         createdAt: daysAgo(4),
-        content: `# Walkthrough: 31245 Sagecrest Way
+        content: `# Walkthrough: 33721 Verbena, Murrieta
+5 bed · 4.5 bath · 4,063 sqft · $739,900 — cut from the listing's own photos of the house.
 
-**Format.** Vertical video, 55 seconds, filmed on phone with a gimbal.
-
-## Hook (0:00 to 0:02)
-Spoken, walking backward through the front door: "This Temecula cul-de-sac
-home has the backyard everyone asks me for."
-On-screen text: POOL + SPA. $689,000.
+## Hook (0:00-0:03)
+Spoken: "Four thousand square feet in Murrieta, and nobody has lived in it yet."
+On screen: 4,063 SQFT · $739,900
 
 ## Shot list
-1. (3s) Front elevation, slow push in. "Four bedrooms, three baths, 2,650
-   square feet."
-2. (5s) Entry to great room, one continuous walk. "Open the door and this is
-   the sight line."
-3. (6s) Kitchen orbit around the quartz island. "Remodeled kitchen, quartz
-   island seats five."
-4. (4s) Primary suite pan. "Primary suite looks over the pool."
-5. (5s) Backyard reveal, low angle over the water. "Pool, spa, and a
-   cul-de-sac lot."
-6. (4s) Three-car garage, quick tilt. "Storage is not a problem."
-7. (3s) Sunset exterior. "Offers reviewed after Sunday's open house."
+1. Approach — push in on the front elevation, 5s. "Three-car garage, stone accents, and that yellow front door."
+2. Entry — walk into the great room, 5s. "You step in and the whole first floor opens up."
+3. Great room — glide toward the windows, 5s. "Wide-plank floors run the length of it."
+4. Kitchen — lateral dolly past the island, 5s. "White cabinets, quartz island, gas range."
+5. Family room — push in on the fireplace, 5s. "The kitchen looks straight into the family room."
+6. Downstairs bed and bath — 5s. "A bedroom and full bath on this floor. That is the one buyers ask for."
+7. Stairs — tilt up, 5s. "Upstairs there is a second living space."
+8. Loft — pan across the built-ins, 5s. "Built-in shelving, room for everybody."
+9. Primary suite — reveal, 5s. "The primary sits at the back, away from the street."
+10. Backyard — wide, 5s. "Big lot, blank canvas, ready for whatever they want back here."
 
-## Captions
-Keep on-screen captions to five words max per shot. Price stays pinned top
-right the whole video.
+## Captions (five words max)
+4,063 sqft · Bed and bath downstairs · Kitchen opens to family · Loft upstairs · Murrieta $739,900
+
+## Music and pacing
+Warm and unhurried. Cut when the camera settles, never mid-move.
 
 ## Post copy
-Just listed in Temecula. 4 bed, 3 bath, pool and spa on a cul-de-sac.
-$689,000. Open Saturday and Sunday 12 to 3.
-#TemeculaRealEstate #JustListed #TemeculaHomes #SoCalLiving
+5 bed, 4.5 bath, 4,063 sqft in Murrieta at $739,900. Downstairs bedroom and full bath, kitchen open to the family room, loft upstairs. Comment TOUR and I'll send the full walkthrough. #murrietahomes #temeculavalley #realestate
+
+## 30-second cutdown
+Shots 1, 2, 4, 5, 8 — end on the price card.
 
 ## CTA
-"Comment TOUR and I will send you the private showing link before the
-weekend."`,
+"Want to see it before the weekend? Comment TOUR and I'll text you times."
+`,
       },
       {
         id: "doc-buyer-programs",
@@ -404,14 +411,14 @@ pass on a phone, post the same day.
         kind: "shipped",
         createdAt: daysAgo(2),
         message:
-          "Walkthrough script filed for 31245 Sagecrest Way. Film Saturday morning, post before the open house.",
+          "Walkthrough script filed for 33721 Verbena. Film Saturday morning, post before the open house.",
       },
       {
         id: "act-3",
         kind: "shipped",
         createdAt: hoursAgo(6),
         message:
-          "27810 Juniper Bend staged as coming soon. Photos Thursday; generate the walkthrough now so it drops the same day.",
+          "25018 Cinnabar Ct staged as coming soon. Photos Thursday; generate the walkthrough now so it drops the same day.",
       },
     ],
     integrations: [
@@ -524,11 +531,11 @@ pass on a phone, post the same day.
         timeline: "Move-up buyer, flexible on close",
         preapproved: true,
         lender: "Preapproved to $780k",
-        source: "Juniper Bend inquiry",
-        notes: "Needs a downstairs bedroom for her mom. Saw Juniper Bend online twice.",
+        source: "Cinnabar Ct inquiry",
+        notes: "Needs a downstairs bedroom for her mom. Saw Cinnabar Ct online twice.",
         savedHomes: [],
         touches: [
-          { id: "ct-ng-1", note: "Called after the Juniper Bend inquiry. Touring Saturday.", at: daysAgo(1) },
+          { id: "ct-ng-1", note: "Called after the Cinnabar Ct inquiry. Touring Saturday.", at: daysAgo(1) },
         ],
         nextFollowUp: daysAgo(-1),
         lastTouchAt: daysAgo(1),
@@ -559,8 +566,8 @@ pass on a phone, post the same day.
         kind: "seller",
         stage: "contingencies",
         phone: "951-555-0119",
-        listingId: "ls-lakeshore",
-        timeline: "Closing on the Lakeshore condo",
+        listingId: "ls-32348yosemitel",
+        timeline: "Closing on the Yosemite condo",
         source: "Past client referral",
         notes: "In escrow. Appraisal ordered; keep them posted twice a week.",
         savedHomes: [],
@@ -577,8 +584,8 @@ pass on a phone, post the same day.
         kind: "past",
         stage: "closed",
         phone: "951-555-0163",
-        listingId: "ls-vistadelsol",
-        source: "Vista Del Sol sale",
+        listingId: "ls-45027soniadr",
+        source: "Sonia Dr sale",
         notes: "Closed in the spring. Anniversary card and a market update.",
         savedHomes: [],
         touches: [
@@ -592,7 +599,7 @@ pass on a phone, post the same day.
     posters: [
       {
         id: "poster-sagecrest",
-        listingId: "ls-sagecrest",
+        listingId: "ls-33721verbena",
         kind: "just-listed",
         eyebrow: "Just listed in Temecula",
         headline: "The backyard everyone asks me for",
@@ -610,7 +617,7 @@ pass on a phone, post the same day.
       {
         id: "sms-seed-1",
         to: "951-237-4991",
-        body: "ListingDesk: Tracy Nguyen just came in as a new lead on 27810 Juniper Bend. Answer inside five minutes; the follow-up is drafting.",
+        body: "ListingDesk: Tracy Nguyen just came in as a new lead on 25018 Cinnabar Ct. Answer inside five minutes; the follow-up is drafting.",
         event: "lead",
         status: "queued",
         detail: "Connect Twilio to deliver for real.",
@@ -622,14 +629,14 @@ pass on a phone, post the same day.
         id: "msg-checkin-1",
         role: "assistant",
         content:
-          "Morning, Leslie. Juniper Bend's photos land Thursday. Want the walkthrough filmed and the just-listed set posted the same day? The script is one click away.",
+          "Morning, Leslie. Cinnabar Ct's photos land Thursday. Want the walkthrough filmed and the just-listed set posted the same day? The script is one click away.",
         createdAt: hoursAgo(9),
       },
       {
         id: "msg-checkin-2",
         role: "assistant",
         content:
-          "The Sagecrest walkthrough is approved and sitting in your Social drafts. Post it before Saturday's open house and comment-gate the showing link?",
+          "The Verbena walkthrough is approved and sitting in your Social drafts. Post it before Saturday's open house and comment-gate the showing link?",
         createdAt: hoursAgo(2),
       },
     ],

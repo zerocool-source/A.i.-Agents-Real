@@ -4,7 +4,7 @@ import { bindings } from "../bindings.server";
 import { buildSeed } from "./seed";
 import type { DB } from "./types";
 
-const KEY = "listingdesk-v10";
+const KEY = "listingdesk-v11";
 
 // In-memory fallback so the app still works if D1 is briefly unavailable
 // during local dev (real deploys always have DB bound via app.manifest.json).

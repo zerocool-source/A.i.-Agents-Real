@@ -407,6 +407,7 @@ export interface MarketHome {
   lng?: number;
   url?: string;
   openHouse?: string;
+  mls?: string;
 }
 
 export interface MarketStats {

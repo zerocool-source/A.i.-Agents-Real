@@ -4,7 +4,12 @@ import { z } from "zod";
 
 import { askBrain, brainIsLive, runTaskBrain } from "./claude.server";
 import { businessContext } from "./context";
-import { SEARCH_AREAS, searchMarket } from "./market.server";
+import {
+  SEARCH_AREAS,
+  fetchPhotoBytes,
+  lookupListingByUrl,
+  searchMarket,
+} from "./market.server";
 import { notify, twilioReady } from "./sms.server";
 import { bindings } from "../bindings.server";
 import { readDB, updateDB, uid } from "./store.server";
@@ -947,12 +952,117 @@ function parseListingUrl(url: string): { address: string; city: string } {
 // Paste a listing link (Zillow etc.) and it lands on the board as a staged
 // shell; she confirms price and details. With an Apify token saved, the
 // walkthrough video pipeline can pull the full listing later.
+// Map how the listing site describes a home onto her own board stages.
+function statusFromSource(status?: string): ListingStatus {
+  const t = (status ?? "").toLowerCase();
+  if (t.includes("sold")) return "sold";
+  if (t.includes("pending") || t.includes("contingent")) return "pending";
+  if (t.includes("coming") || t.includes("pre on-market")) return "coming-soon";
+  return "active";
+}
+
+// Pull the listing's own photo into her storage so the board shows the real
+// house rather than hotlinking someone else's server.
+async function storeRemotePhoto(
+  listingId: string,
+  photoUrl: string,
+): Promise<string | null> {
+  const { STORAGE } = bindings();
+  if (!STORAGE) return null;
+  const got = await fetchPhotoBytes(photoUrl);
+  if (!got) return null;
+  const ext = got.contentType.includes("png")
+    ? "png"
+    : got.contentType.includes("webp")
+      ? "webp"
+      : "jpg";
+  const photoId = `${uid("ph")}.${ext}`;
+  await STORAGE.put(`listing-photos/${photoId}`, got.bytes, {
+    httpMetadata: { contentType: got.contentType },
+  });
+  const url = `/photos/${photoId}`;
+  let attached = false;
+  await updateDB((db) => {
+    const l = db.listings.find((x) => x.id === listingId);
+    if (!l) return;
+    l.photos = [...(l.photos ?? []), url];
+    if (!l.photoUrl) l.photoUrl = url;
+    attached = true;
+  });
+  if (!attached) {
+    await STORAGE.delete(`listing-photos/${photoId}`);
+    return null;
+  }
+  return url;
+}
+
+// Paste any listing link — Redfin, Zillow, an IDX page — and the desk pulls
+// the real property: address, price, beds, baths, square feet, the agent's
+// own remarks, the map pin, and the listing photo.
 export const importListing = createServerFn({ method: "POST" })
   .inputValidator(z.object({ url: z.string().min(8) }))
   .handler(async ({ data }) => {
     const url = data.url.trim();
-    const { address, city } = parseListingUrl(url);
+    const found = await lookupListingByUrl(url);
     const importId = uid("ls");
+
+    if (found) {
+      const geo =
+        typeof found.lat === "number" && typeof found.lng === "number"
+          ? { lat: found.lat, lng: found.lng }
+          : geoForCity(found.city, importId);
+      const listing: Listing = {
+        id: importId,
+        address: found.address,
+        city: found.city,
+        lat: geo.lat,
+        lng: geo.lng,
+        price: found.price ?? 0,
+        beds: found.beds ?? 0,
+        baths: found.baths ?? 0,
+        sqft: found.sqft ?? 0,
+        features:
+          found.features ||
+          [
+            found.beds ? `${found.beds} bed` : "",
+            found.baths ? `${found.baths} bath` : "",
+            found.yearBuilt ? `built ${found.yearBuilt}` : "",
+          ]
+            .filter(Boolean)
+            .join(" · ") ||
+          "Confirm the features.",
+        status: statusFromSource(found.status),
+        leadCount: 0,
+        sourceUrl: url,
+        notes: `Pulled from the live listing${found.mls ? ` · MLS# ${found.mls}` : ""}. Confirm anything that changed.`,
+        createdAt: new Date().toISOString(),
+      };
+      await updateDB(async (db) => {
+        db.listings.unshift(listing);
+        db.activity.push({
+          id: uid("act"),
+          kind: "system",
+          createdAt: new Date().toISOString(),
+          message: `Pulled ${listing.address}, ${listing.city} from the live listing — $${listing.price.toLocaleString("en-US")}, ${listing.beds} bed, ${listing.sqft.toLocaleString("en-US")} sqft. Generate the walkthrough when you are ready.`,
+        });
+      });
+      const wanted = (found.photoUrls?.length
+        ? found.photoUrls
+        : found.photoUrl
+          ? [found.photoUrl]
+          : []
+      ).slice(0, 4);
+      for (const src of wanted) await storeRemotePhoto(importId, src);
+      const db = await readDB();
+      return {
+        listing: db.listings.find((l) => l.id === importId) ?? listing,
+        real: true as const,
+      };
+    }
+
+    // The link did not resolve to a listing we can read — file the address so
+    // she can fill in the rest by hand rather than losing the paste.
+    const { address, city } = parseListingUrl(url);
     const importGeo = geoForCity(city || "", importId);
     const listing: Listing = {
       id: importId,
@@ -968,7 +1078,8 @@ export const importListing = createServerFn({ method: "POST" })
       status: "coming-soon",
       leadCount: 0,
       sourceUrl: url,
-      notes: "Imported from a listing link. Edit price, beds, and baths.",
+      notes:
+        "That site would not hand over the listing details, so only the address came through. Fill in price, beds and baths, or add her photos.",
       createdAt: new Date().toISOString(),
     };
     await updateDB((db) => {
@@ -980,7 +1091,35 @@ export const importListing = createServerFn({ method: "POST" })
         message: `Imported ${listing.address} from a listing link. Confirm the details, then generate the walkthrough.`,
       });
     });
-    return { listing };
+    return { listing, real: false as const };
+  });
+
+// Fetch the listing photo for a home she already has on the board.
+export const pullListingPhoto = createServerFn({ method: "POST" })
+  .inputValidator(z.object({ id: z.string() }))
+  .handler(async ({ data }) => {
+    const db = await readDB();
+    const listing = db.listings.find((l) => l.id === data.id);
+    if (!listing) return { error: "listing not found" as const };
+    if (!listing.sourceUrl)
+      return { error: "no listing link on this one" as const };
+    const found = await lookupListingByUrl(listing.sourceUrl);
+    const sources = (found?.photoUrls?.length
+      ? found.photoUrls
+      : found?.photoUrl
+        ? [found.photoUrl]
+        : []
+    ).slice(0, 4);
+    if (sources.length === 0)
+      return { error: "that listing would not hand over a photo" as const };
+    const urls: string[] = [];
+    for (const src of sources) {
+      const stored = await storeRemotePhoto(listing.id, src);
+      if (stored) urls.push(stored);
+    }
+    if (urls.length === 0)
+      return { error: "photo storage is not available" as const };
+    return { url: urls[0], count: urls.length };
   });
 
 // Her own document: pasted or uploaded (the browser reads the file and
