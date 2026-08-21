@@ -46,6 +46,11 @@ are served from `/photos/$photoId`.
 
 ## Build
 
+Verified from a clean copy of this directory (2026-08-21): `bun install`
+succeeds, `vite build` emits `dist/server/server.js`, and `wrangler dev`
+serves every route (`/`, `/search`, `/clients`, `/plan`, `/studio`,
+`/home/$listingId`).
+
 ```bash
 cd app
 bun install          # or npm install
@@ -71,9 +76,12 @@ Deploying needs the Higgsfield website MCP tools:
 2. push to that remote's `main`
 3. `deploy_website` → builds from `main` and ships to the live URL
 
-Those tools disconnected mid-session on 2026-08-19, which is why this copy exists.
-The commits waiting to ship are in the build container's clone; this directory is
-the same tree.
+Those tools disconnected mid-session on 2026-08-19 and had not returned as of
+2026-08-21 — the app repo answers 404 from two independent networks and the
+scoped token is dead, so the deploy channel is unreachable from that session.
+This directory is the complete, build-verified tree; a session with the
+Higgsfield website tools can clone it, push, and deploy without any other
+preparation.
 
 ## Testing
 
